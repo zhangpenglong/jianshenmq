@@ -69,6 +69,10 @@ function md5(data) {
   if (!data.uniqueId) {
     data.uniqueId = ''
   }
+  data.userId = wx.getStorageSync('userId')
+  if(!data.userId){
+    data.userId = ''
+  }
 
   var temp = [];
   for (var key in data) {
@@ -108,18 +112,11 @@ function login(cb) {
           success: function (res1) {
             if(res1.result.code == 1){
               var bodyMap = res1.bodyMap 
-              if (bodyMap.role == 0){
-                  wx.showActionSheet({
-                    itemList: ['我是学员', '我是教练'],
-                    success: function (res) {
-                      console.log(res.tapIndex)
-                     
-                     
-                    },
-                    fail: function (res) {
-                      console.log(res.errMsg)
-                    }
-                  })
+              wx.setStorageSync('userId', bodyMap.userinfo.id)
+              if (bodyMap.role == 2){
+                 that.selectRole()
+                }else{
+                  wx.setStorageSync('role', bodyMap.role)
                 }
             }else{
 
@@ -142,12 +139,42 @@ function login(cb) {
 }
 
 
+function selectRole(cb){
+  var that = this
+  wx.showActionSheet({
+    itemList: ['我是学员', '我是教练'],
+    success: function (res) {
+      if (res.tapIndex == 0 || res.tapIndex == 1) {
+        that.requestData({
+          url: 'login/setRole',
+          data: {
+            tapIndex: res.tapIndex
+          },
+          method: '',
+          success: function (res2) {
+            if (res2.result.code == 1) {
+              wx.setStorageSync('role', res.tapIndex)
+              typeof cb == "function" && cb()
+            } else {
+
+            }
+          }
+        })
+      }
+    },
+    fail: function (res) {
+      console.log(res.errMsg)
+    }
+  })
+
+}
+
 module.exports.requestData = requestData
 exports.requestData = requestData
 
 
 module.exports.login = login
-
+module.exports.selectRole = selectRole
 
 module.exports.md5 = md5
 exports.md5 = md5
