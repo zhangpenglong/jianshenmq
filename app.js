@@ -43,5 +43,11 @@ App({
   },
   login:function(){
     common.login();
+  },
+  selectRole : function(cb){
+    common.selectRole(cb)
+  },
+  request: function (requestHandler){
+    common.requestData(requestHandler)
   }
 })

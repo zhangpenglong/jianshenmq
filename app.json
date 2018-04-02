@@ -16,7 +16,8 @@
     "pages/video/video",
     "pages/signin/sign-in",
     "pages/appointment/appointment",
-    "pages/coaches-detail/coaches-detail"
+    "pages/coaches-detail/coaches-detail",
+    "pages/add/add"
   ],
   "window": {
     "backgroundTextStyle": "light",
