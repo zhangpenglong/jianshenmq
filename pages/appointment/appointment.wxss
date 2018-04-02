@@ -149,3 +149,13 @@
   color: #aaa;
   font-size: 10px;
 }
+
+.zan-add{
+    margin-bottom: 20rpx;
+    margin-left: 20rpx;
+}
+.zan-button{
+  width: 200rpx;
+  height: 50prx;
+  margin-left: 450rpx;
+}

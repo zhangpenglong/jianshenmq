@@ -8,28 +8,63 @@ Page({
   data: {
       coaches:[],
       starCoaches: [],      
-      coachcategoryid:0
+      coachcategoryid:1,
+      flag:false
   },
 
   /**
    * 生命周期函数--监听页面加载
    */
   onLoad: function (options) {
-    console.log('appoint onload');
-    const that = this;
-    wx.request({
-      url: 'https://api.it120.cc/' + app.globalData.subDomain + '/cms/category/list',
-      success: function (res) {
-        var coachcategoryid = 0;
-        for (var i = 0; i < res.data.data.length; i++) {
-          if (res.data.data[i].name == "coach") {
-            coachcategoryid = res.data.data[i].id;
+    if(wx.getStorageSync('role') == 0 || wx.getStorageSync('role') == 1){
+      const that = this;
+      app.request({
+        url:'studentTeacher/selectBinding',
+        data:{
+          role:wx.getStorageSync('role'),
+          pageIndex:1
+        },
+        method:'',
+        success:function(res){
+          if(res.result.code == 1){
+            if (res.bodyMap.stList){
+              that.setData({
+                starCoaches: res.bodyMap.stList,
+                flag:true
+              })
+            }
+             
+          }else{
+
           }
+
+        },fail:function(){
+
         }
-        that.data.coachcategoryid = coachcategoryid;
-        that.getNewsList(that.data.coachcategoryid);
-      }
-    });
+
+      })
+    }else{
+      app.selectRole(function () {
+        const that = this;
+        wx.request({
+          url: 'https://api.it120.cc/' + app.globalData.subDomain + '/cms/category/list',
+          success: function (res) {
+            var coachcategoryid = 0;
+            for (var i = 0; i < res.data.data.length; i++) {
+              if (res.data.data[i].name == "coach") {
+                coachcategoryid = res.data.data[i].id;
+              }
+            }
+            that.data.coachcategoryid = coachcategoryid;
+            that.getNewsList(that.data.coachcategoryid);
+          }
+        });
+
+
+      })
+    }
+
+   
   },
 
   /**
@@ -79,6 +114,14 @@ Page({
    */
   onShareAppMessage: function () {
   
+  },
+
+  add:function(){
+      console.log("按钮")
+      wx.navigateTo({
+        url:'../add/add'
+      })
+
   },
   getNewsList: function (categoryId) {
     if (categoryId == 0) {

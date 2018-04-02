@@ -1,0 +1,27 @@
+<!--pages/Form/Form.wxml-->
+<view class='container'>
+
+  <form bindsubmit="formSubmit" bindreset="formReset">
+    <view class='form-box'>
+
+      <view class="row-wrap">
+        <view class="label-right">
+          <input name="phoneNum" maxlength='11' class="input" type="number" placeholder="请输入对方手机号" value="{{addressData.linkMan}}{{wxaddress.userName}}" />
+        </view>
+      
+      </view>
+
+      <view class="row-wrap">
+        <view class="label-right">
+          <input name="remarks" maxlength='10' class="input" type="text" placeholder="请输入备注名" value="{{addressData.linkMan}}{{wxaddress.userName}}" />
+        </view>
+      
+      </view>
+
+
+
+
+      <button class='button' formType="submit">绑定</button>
+    </view>
+  </form>
+</view>
