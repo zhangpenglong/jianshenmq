@@ -65,6 +65,7 @@ Page({
 
   },
   formSubmit: function (e) {
+    console.log(1);
     var data = e.detail.value
     if (!data.phoneNum || !data.remarks) {
       wx.showToast({

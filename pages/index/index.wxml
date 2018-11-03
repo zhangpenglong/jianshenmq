@@ -1,40 +1,129 @@
 <!--index.wxml-->
 <!--1px = 750/320 = 2.34rpx;-->
 <view class="container">
-   <view class="swiper-container">
-        <swiper class="swiper_box" 
-                    autoplay="{{autoplay}}" interval="{{interval}}" duration="{{duration}}" bindchange="swiperchange">
-            <block wx:for="{{banners}}">
-                <swiper-item>
-                    <image bindtap="tapBanner" data-id="{{item.businessId}}" src="{{item.picUrl}}" class="slide-image" width="750rpx" height="562.5rpx"/>
-                </swiper-item>
-            </block>
-        </swiper>
-        <view class="dots">  
-            <block wx:for="{{banners}}" wx:key="unique">  
-                <view class="dot{{index == swiperCurrent ? ' active' : ''}}"></view>  
-            </block>  
-        </view>  
-   </view>
-   
-    <view class="type-container">
-        <scroll-view class="type-navbar" scroll-x="true" style="width: 100%">
-            <view class="type-box" wx:for-items="{{categories}}">
-                <view id="{{item.id}}" class="type-navbar-item {{activeCategoryId == item.id ? 'type-item-on' : ''}}" bindtap="tabClick">
-                    {{item.name}}
-                </view>
-            </view>
-        </scroll-view>
+   <view class="typeSearchContainer" > 
+    <view class="typeSearch">
+     <view class='flexCenter' data-index="1" bindtap='bindProductType'>
+        <block wx:if="{{!!typeSearch}}">{{typeSearch}}</block>
+        <block wx:else>状态</block>
+        <view class='border_right'></view>
+     </view>
+     
     </view>
-    <view class="goods-container">
-        <view class="goods-box" wx:for-items="{{goods}}" wx:key="{{index}}" bindtap="toDetailsTap" data-id="{{item.id}}">
-           <view class="img-box">
-              <image src="{{item.pic}}" class="image"/>
-           </view>
-           <view class="goods-title">{{item.name}}</view>
-           <!--<view class="goods-price">¥ {{item.minPrice}}</view>-->
+
+    <view class="typeSearch_view_height"></view>
+  </view>
+
+   <!-- 排序 -->
+  <view class='typeSearch_item_container' wx:if="{{showType && show1}}" >
+    <view class='typeSearch_Sort_container'>
+       <block wx:if = "{{role == 1}}">
+                <view data-orderType="11" bindtap='searchProduct'>等待学员确认</view>
+                 <view data-orderType="10" bindtap='searchProduct'>等待我确认</view>
+       </block>
+        <block wx:if = "{{role == 0}}">
+                <view data-orderType="01" bindtap='searchProduct'>等待我确认</view>
+                 <view data-orderType="00" bindtap='searchProduct'>等待教练确认</view>
+       </block>
+      <block wx:if = "{{role == 1}}">
+          <view data-orderType="12" bindtap='searchProduct'>我拒绝</view>
+          <view data-orderType="13" bindtap='searchProduct'>学员拒绝</view>
+       </block>
+       <block wx:if = "{{role == 0}}">
+          <view data-orderType="02" bindtap='searchProduct'>教练拒绝</view>
+          <view data-orderType="03" bindtap='searchProduct'>我拒绝</view>
+       </block>
+
+
+        <block wx:if = "{{role == 1}}">
+           <view data-orderType="14" bindtap='searchProduct'>我取消</view>
+            <view data-orderType="15" bindtap='searchProduct'>学员取消</view>
+         </block>
+    
+     <block wx:if = "{{role == 0}}">
+           <view data-orderType="04" bindtap='searchProduct'>教练取消</view>
+            <view data-orderType="05" bindtap='searchProduct'>我取消</view>
+         </block>
+      <view data-orderType="06" bindtap='searchProduct'>已结束</view>
+      <view data-orderType="07" bindtap='searchProduct'>正在进行</view>
+      <view data-orderType="08" bindtap='searchProduct'>未开始</view>
+    </view>
+  </view>
+
+  <view class='zhezhao' wx:if="{{showType}}" bindtap='closeZhezhao'></view>
+ 
+
+  <view class='product_page_container'>
+        <block wx:if = "{{!! courseList}}">
+          <view class='product_items2' data-info='{{course}}'  wx:for="{{courseList}}" wx:for-item="course" wx:key="{{course.id}}">
+          <!--  <image mode="aspectFill" src='{{result.imagePath}}?x-oss-process=style/preview'></image>-->
+            <view class='product_items2_view1'>
+              
+              <view>
+                <text class='userName'>{{course.userName}}</text>
+                 </view>
+                  <view>
+                <text class='price'>{{course.startTimeTrim}}---{{course.endTimeTrim}}</text>
+                  
+              </view>
+              <text class='font2'>
+               <block wx:if = "{{course.state == 0}}">
+                 状态:等待教练确认
+               </block>
+                <block wx:elif = "{{course.state == 1}}">
+                 状态:等待学员确认
+               </block>
+                 <block wx:elif = "{{course.state == 2}}">
+                 状态:教练拒绝
+               </block>
+                 <block wx:elif = "{{course.state == 3}}">
+                 状态:学员拒绝
+               </block>
+                 <block wx:elif = "{{course.state == 4}}">
+                 状态:教练取消
+               </block>
+                 <block wx:elif = "{{course.state == 5}}">
+                 状态:学员取消
+               </block>
+                 <block wx:elif = "{{course.state == 6}}">
+                 状态:已结束
+               </block>
+                 <block wx:elif = "{{course.state == 7}}">
+                 状态:正在进行
+               </block>
+                 <block wx:elif = "{{course.state == 8}}">
+                 状态:未开始
+               </block>
+                <block wx:elif = "{{course.state == 9}}">
+                 状态:超时
+               </block>
+               </text>
+              
+                <block wx:if = "{{course.yesBut == 1}}">
+                <view class='view-btu'>
+                 <button type="default" size="{{primarySize}}" loading="{{loading}}" plain="{{plain}}"
+        disabled="{{disabled}}" bindtap="yes" style="width:170rpx;height:70rpx;font-size:30rpx;" data-id="{{course.id}}"> 确认 </button>
+                  <button type="default" size="{{primarySize}}" style="width:170rpx;height:70rpx;font-size:30rpx;" loading="{{loading}}" plain="{{plain}}"
+        disabled="{{disabled}}" bindtap="no" data-id="{{course.id}}"> 拒绝 </button>
         </view>
-    </view>
-    <view hidden="{{loadingMoreHidden ? true : false}}" class="no-more-goods">没有更多啦</view>
+               </block>
+                <block wx:if = "{{course.cancelBut == 1}}">
+                  <view class='view-btu'>
+                  <button type="default" size="{{primarySize}}" style="width:170rpx;height:70rpx;font-size:30rpx;" loading="{{loading}}" plain="{{plain}}"
+        disabled="{{disabled}}" bindtap="cancel" data-id="{{course.id}}"> 取消 </button>
+        </view>
+               </block>
+               
+            </view>
+            
+          </view>
+        </block>
+
+        <block wx:else>
+          <view class="noproduct">
+            <image mode="widthFix" src='/images/icons/no-product.png'></image>
+            <text>没有相关商品</text>
+          </view>
+        </block>
+      </view>
 </view>
-<view class="footaboutme"><text>技术支持：智汇番茄科技工作室\r\nWechat：18629027590</text></view>

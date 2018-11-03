@@ -9,6 +9,7 @@ Page({
     hidePopup:true,
     phoneNumber:'请输入',
     userInfo: {},
+    hasUserInfo:false,
     items: [
       {
         icon: '../../images/mine/Fingerprint.png',
@@ -61,11 +62,11 @@ Page({
     this.getUserInfo();
     console.log(this.data.userinfo);
 
-    wx.getWeRunData({
+  /**  wx.getWeRunData({
       success(res) {
         console.log(res);
       }
-    })
+    })**/
   },
 
   /**
@@ -126,16 +127,21 @@ Page({
 
     if (userInfo) {
       that.setData({
-        userInfo: userInfo
+        userInfo: userInfo,
+        hasUserInfo:true
       })
       return
     }
 
-    userInfo = App.getUserInfo();
-    console.log(userInfo);
-    that.setData({
-      userInfo: userInfo
+    wx.getUserInfo({
+      success: (data) => {
+       that.setData({
+          userInfo: data.userInfo,
+          hasUserInfo: true
+        })
+      }
     })
+   
   },
 
   bindtap(e) {
@@ -166,6 +172,59 @@ Page({
       hidePopup: true
     })
   },
+
+  // 获取用户信息
+  onGotUserInfo: function (res) {
+    var that = this
+    if (res.detail.userInfo) {
+      let code = null;
+      wx.login({
+        success: function (res1) {
+          var url = 'login/wxSession'
+
+          App.request({
+            url: url,
+            data: {
+              code: res1.code,
+              userInfo: res.detail,
+            },
+            method: '',
+            success: function (res) {
+              if (res1.result.code == 1) {
+                var bodyMap = res1.bodyMap
+                wx.setStorageSync('userId', bodyMap.userinfo.id)
+                if (bodyMap.role == 2) {
+                  that.selectRole()
+                } else {
+                  wx.setStorageSync('role', bodyMap.role)
+                }
+              } else {
+
+              }
+
+            }, fail: function () {
+
+            }
+
+          })
+
+
+        },
+        fail: function (err) {
+
+        }
+      });
+
+      that.setData({
+        userInfo: res.detail.userInfo,
+        hasUserInfo: true
+      })
+
+
+    }
+  },
+
+
   showPopupTap: function () {
     this.setData({
       hidePopup: false

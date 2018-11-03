@@ -1,8 +1,13 @@
 <!--mine.wxml-->
 <view class="container">
 	<view  bindtap="bindViewTap" class="userinfo">
-		<image class="userinfo-avatar" src="{{ userInfo.avatarUrl }}" background-size="cover"></image>
+  		<image class="userinfo-avatar" src="{{ userInfo.avatarUrl }}" background-size="cover"></image>
 		<text class="userinfo-nickname">{{ userInfo.nickName }}</text>
+
+
+ <view class="" wx:if="{{!hasUserInfo}}">
+     <button open-type="getUserInfo" lang="zh_CN" bindgetuserinfo="onGotUserInfo">获取用户信息</button>
+  </view>   
 	</view>
   <view class="zan-panel">
     <view class="zan-cell zan-cell--access" wx:for="{{ items }}" wx:key="" data-path="{{ item.path }}" data-index="{{ index }}" bindtap="navigateTo">
@@ -64,4 +69,5 @@
                 </view>
             </navigator>
         </view>-->
+         
 </view>

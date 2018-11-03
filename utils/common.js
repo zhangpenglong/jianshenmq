@@ -1,9 +1,9 @@
 var mdutil = require('md5.js')
-var host = "http://jianshenapi.pipichongwu.cn/jianshenapi/"
+var host = "http://127.0.0.1:8088/api/"
 function requestData(requestHandler) {
   var that = this
   var method = requestHandler.method == '' ? 'GET' : requestHandler.method
-  var data = that.md5(requestHandler.data);
+  var data = requestHandler.data;
   data.isWXSmallProgram = 1
   if (requestHandler.nodata) {
     var nodata = requestHandler.nodata
@@ -28,8 +28,7 @@ function requestData(requestHandler) {
 
       wx.hideLoading()
       if (res.statusCode == 200) {
-        var data = JSON.parse(res.data)
-        requestHandler.success(data)
+        requestHandler.success(res.data)
       } else {
         requestHandler.fail()
       }
@@ -97,29 +96,30 @@ function md5(data) {
 
 function login(cb) {
   var that = this;
-  if (wx.getStorageSync('userId')) {
+  if (wx.getStorageSync('token')) {
     typeof cb == "function" && cb()
   } else {
     //调用登陆接口
     wx.login({
       success: function (res) {
         wx.setStorageSync('code', res.code)
-        var url = 'login/wxSession'
+        var url = 'baseuser/wxSession'
         that.requestData({
           url: url,
           data: { code: res.code },
           method: '',
           success: function (res1) {
-            if(res1.result.code == 1){
-              var bodyMap = res1.bodyMap 
-              wx.setStorageSync('userId', bodyMap.userinfo.id)
+            if(res1.code == 1){
+              var bodyMap = res1.body 
+              wx.setStorageSync('token', bodyMap.token)
+              wx.setStorageSync('userName', bodyMap.userName)
               if (bodyMap.role == 2){
                  that.selectRole()
                 }else{
                   wx.setStorageSync('role', bodyMap.role)
                 }
             }else{
-
+                  
             }
            
 

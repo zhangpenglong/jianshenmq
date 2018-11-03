@@ -8,32 +8,36 @@
    
     <view class="zan-cell">
       <block wx:if="{{flag}}">
-        <view class="zan-cell__bd">上月明星教练</view>
-        <view class="zan-cell__ft">Star</view>
+       <block wx:if="{{userRole == 0}}">
+          <view class="zan-cell__bd">我的教练</view>
+       </block>
+        <block wx:if="{{userRole == 1}}">
+          <view class="zan-cell__bd">我的学员</view>
+       </block>
+       
       </block>
       <block wx:else>
            <view class="zan-cell__bd">您还没有添加教练，去添加吧！</view>
-
       </block>
     </view>
     <block wx:for="{{ starCoaches }}">
       <!-- <navigator url="/pages/articles-detail/index?id={{item.id}}"> -->
       <view class="article__item">
-        <view class="article__thumb">
+       <!-- <view class="article__thumb">
           <image class="article__image" src="{{ item.pic }}"></image>
-        </view>
+        </view>-->
         <view class="article__info">
           <view class="article__title">
-            <view class="article__title_font">{{ item.title }}</view>
-            <navigator url="/pages/coaches-detail/coaches-detail?id={{item.id}}">
+            <view class="article__title_font">{{ item.remarksName }}</view>
+            <navigator url="/pages/coaches-detail/coaches-detail?teacherId={{item.teacherId}}&&name={{item.remarksName}}&&studentId={{item.studentId}}">
               <view class="appointBtn border-radius">
                 <view class="appointFont">约TA</view>
               </view>
             </navigator>
           </view>
-          <view class="article__desc">
+          <!--<view class="article__desc">
             <text class="article__time">上月成功预约{{ item.income }}次</text>
-          </view>
+          </view>-->
         </view>
       </view>
       <!-- </navigator> -->

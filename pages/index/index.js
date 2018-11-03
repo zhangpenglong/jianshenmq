@@ -15,39 +15,19 @@ Page({
     activeCategoryId: 0,
     goods:[],
     scrollTop:"0",
-    loadingMoreHidden:true
+    loadingMoreHidden:true,
+    pageIndex:0,
+    totalPage:0,
+    courseList:[],
+    showType: false,
+    show0: false,
+    show1: false,
+    show2: false,
+    bindProductTypeIndex: null,
+    role:wx.getStorageSync('role'),
   },
 
-  tabClick: function (e) {
-    this.setData({
-      activeCategoryId: e.currentTarget.id
-    });
-    this.getGoodsList(this.data.activeCategoryId);
-  },
-  //事件处理函数
-  swiperchange: function(e) {
-      //console.log(e.detail.current)
-       this.setData({  
-        swiperCurrent: e.detail.current  
-    })  
-  },
-  toDetailsTap:function(e){
-    wx.navigateTo({
-      url:"/pages/goods-details/index?id="+e.currentTarget.dataset.id
-    })
-  },
-  tapBanner: function(e) {
-    if (e.currentTarget.dataset.id != 0) {
-      wx.navigateTo({
-        url: "/pages/goods-details/index?id=" + e.currentTarget.dataset.id
-      })
-    }
-  },
-  bindTypeTap: function(e) {
-     this.setData({  
-        selectCurrent: e.index  
-    })  
-  },
+ 
   scroll: function (e) {
     //  console.log(e) ;
     var that = this,scrollTop=that.data.scrollTop;
@@ -63,78 +43,217 @@ Page({
     wx.setNavigationBarTitle({
       title: "全部课程"
     });
-    /*
-    //调用应用实例的方法获取全局数据
-    app.getUserInfo(function(userInfo){
-      //更新数据
-      that.setData({
-        userInfo:userInfo
-      })
-    })
-    */
-    wx.request({
-      url: 'https://api.it120.cc/'+ app.globalData.subDomain +'/banner/list',
-      data: {
-        key: 'mallName'
-      },
-      success: function(res) {
-        var banners = [];
-        for (var i = 0; i < res.data.data.length; i++) {
-          if (res.data.data[i].type == "goods") {
-            banners.push(res.data.data[i]);
-          }
-        }
-        that.setData({
-          banners: banners
-        });
-      }
-    })
-    wx.request({
-      url: 'https://api.it120.cc/'+ app.globalData.subDomain +'/shop/goods/category/all',
-      success: function(res) {
-        var categories = [{id:0, name:"全部"}];
-        for(var i=0;i<res.data.data.length;i++){
-          categories.push(res.data.data[i]);
-        }
-        that.setData({
-          categories:categories,
-          activeCategoryId:0
-        });
-        that.getGoodsList(0);
-      }
-    })
+
 
   },
-  getGoodsList: function (categoryId) {
-    if (categoryId == 0) {
-      categoryId = "";
-    }
-    //console.log(categoryId)
+
+
+  /**
+   * 生命周期函数--监听页面显示
+   */
+  onShow: function () {
     var that = this;
-    wx.request({
-      url: 'https://api.it120.cc/'+ app.globalData.subDomain +'/shop/goods/list',
+    that.listCourse(-1)
+  },
+
+  listCourse : function(status){
+    var that = this;
+    var data = {}
+    if(null == status){
+     
+    }
+    app.request({
+      url: 'course/selectByPage',
       data: {
-        categoryId: categoryId
+        userId: wx.getStorageSync('userId'),
+        pageIndex: that.data.pageIndex,
+        state:status,
       },
-      success: function(res) {
-        that.setData({
-          goods:[],
-          loadingMoreHidden:true
-        });
-        var goods = [];
-        if (res.data.code != 0 || res.data.data.length == 0) {
-          that.setData({
-            loadingMoreHidden:false,
-          });
-          return;
+      method: '',
+      success: function (res) {
+        if (res.code == 1) {
+          if (res.body.courseList) {
+            that.setData({
+              courseList: res.body.courseList
+            })
+          }
+
+        } else {
+
         }
-        for(var i=0;i<res.data.data.length;i++){
-          goods.push(res.data.data[i]);
-        }
-        that.setData({
-          goods:goods,
-        });
+
+      }, fail: function () {
+
       }
+
     })
-  }
+  },
+
+  //确认
+  yes:function(e){
+    var courseId = e.currentTarget.dataset.id
+    var state = 8
+    this.updateState(state,courseId)
+  },
+  //拒绝
+  no:function(e){
+    var courseId = e.currentTarget.dataset.id
+    var state = 3
+    if (wx.getStorageSync('role') == 1){
+      state = 2
+    }
+    this.updateState(state, courseId)
+  },
+
+  //取消
+  cancel:function(e){
+    var courseId = e.currentTarget.dataset.id
+    var state = 5
+    if (wx.getStorageSync('role') == 1) {
+      state = 4
+    }
+    this.updateState(state, courseId)
+  },
+
+  updateState: function (state, courseId){
+    var that = this
+    app.request({
+      url: 'course/updateState',
+      data: {
+        state: state,
+        courseId:courseId
+      },
+      method: '',
+      success: function (res) {
+        var  courseList = that.data.courseList
+
+        if (res.code == 1) {
+
+          for (var i = 0; i < courseList.length; i++){
+              if(courseList[i].id == courseId){
+                courseList[i].yesBut = res.yesBut
+                courseList[i].cancelBut = res.cancelBut
+                courseList[i].state = state
+              }
+          }
+          that.setData({
+            courseList:courseList
+          })
+        } else {
+
+        }
+
+      }, fail: function () {
+
+      }
+
+    })
+  },
+  /* 点击分类 */
+  bindProductType: function (e) {
+    var index = e.currentTarget.dataset.index;
+    if (index == this.data.bindProductTypeIndex) {
+      this.data.showType = false;
+
+      this.setData({
+        showType: this.data.showType,
+        bindProductTypeIndex: null
+      })
+    }
+    else {
+      this.data.showType = true;
+      this.data.bindProductTypeIndex = index;
+      this.data.show1 = true;
+      this.setData({
+        show1: this.data.show1,
+        showType: this.data.showType,
+        bindProductTypeIndex: this.data.bindProductTypeIndex
+      })
+
+    }
+
+  },
+
+
+
+  /* 分类查询 */
+  searchProduct: function (event) {
+    var that = this;
+    this.setData({ showType: false, bindProductTypeIndex: null })
+    console.log(event.currentTarget.dataset)
+    var focusKey = event.currentTarget.dataset;
+    console.log(this.params)
+    for (let i in focusKey) {
+      for (let j in this.params) {
+        if (i.toLowerCase() == j.toLowerCase()) { this.params[j] = focusKey[i] }
+      }
+    }
+    switch (focusKey.ordertype) {
+      case '00': {
+        this.setData({ typeSearch: '等待教练确认' }); break;
+      };
+      case '01': {
+        this.setData({ typeSearch: '等待我确认' }); break;
+      };
+      case '10': {
+        this.setData({ typeSearch: '等待我确认' }); break;
+      };
+      case '11': {
+        this.setData({ typeSearch: '等待学员确认' }); break;
+      };
+      case '12': {
+        this.setData({ typeSearch: '我拒绝' }); break;
+      };
+      case '13': {
+        this.setData({ typeSearch: '学员拒绝' }); break;
+      };
+      case '02': {
+        this.setData({ typeSearch: '教练拒绝' }); break;
+      };
+      case '03': {
+        this.setData({ typeSearch: '我拒绝' }); break;
+      };
+      case '14': {
+        this.setData({ typeSearch: '我取消' }); break;
+      };
+      case '15': {
+        this.setData({ typeSearch: '学员取消' }); break;
+      };
+      case '04': {
+        this.setData({ typeSearch: '教练取消' }); break;
+      };
+      case '05': {
+        this.setData({ typeSearch: '我取消' }); break;
+      };
+      case '06': {
+        this.setData({ typeSearch: '已结束' }); break;
+      };
+      case '07': {
+        this.setData({ typeSearch: '正在进行' }); break;
+      };
+      case '08': {
+        this.setData({ typeSearch: '未开始' }); break;
+      };
+      case '09': {
+        this.setData({ typeSearch: '超时' }); break;
+      };
+    }
+
+    console.log(this.params)
+   // this.params.page = 1
+    //var customIndex = this.more_product_list_URL(this.params);
+    //console.log(customIndex)
+    wx.showLoading({
+      title: 'loading'
+    })
+   // that.listPage.page = 1
+   // that.params.page = 1
+     this.setData({
+      pageIndex: 1,
+          
+    })
+     var status = focusKey.ordertype;
+    that.listCourse(status.substring(1,2))
+  },
+ 
 })

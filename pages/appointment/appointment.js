@@ -9,43 +9,62 @@ Page({
       coaches:[],
       starCoaches: [],      
       coachcategoryid:1,
-      flag:false
+      flag:false,
+      userRole : null
   },
 
   /**
    * 生命周期函数--监听页面加载
    */
   onLoad: function (options) {
-    if(wx.getStorageSync('role') == 0 || wx.getStorageSync('role') == 1){
-      const that = this;
+   
+  },
+
+  /**
+   * 生命周期函数--监听页面初次渲染完成
+   */
+  onReady: function () {
+  
+  },
+
+  /**
+   * 生命周期函数--监听页面显示
+   */
+  onShow: function () {
+    const that = this;
+
+    if (wx.getStorageSync('role') == 0 || wx.getStorageSync('role') == 1) {
+      that.setData({
+        userRole: wx.getStorageSync('role')
+      })
       app.request({
-        url:'studentTeacher/selectBinding',
-        data:{
-          role:wx.getStorageSync('role'),
-          pageIndex:1
+        url: 'studentTeacher/selectBinding',
+        data: {
+          role: wx.getStorageSync('role'),
+          pageIndex: 1
         },
-        method:'',
-        success:function(res){
-          if(res.result.code == 1){
-            if (res.bodyMap.stList){
+        method: '',
+        success: function (res) {
+          if (res.result.code == 1) {
+            if (res.bodyMap.stList) {
               that.setData({
                 starCoaches: res.bodyMap.stList,
-                flag:true
+                flag: true
               })
             }
-             
-          }else{
+
+          } else {
 
           }
 
-        },fail:function(){
+        }, fail: function () {
 
         }
 
       })
-    }else{
+    } else {
       app.selectRole(function () {
-        const that = this;
+
         wx.request({
           url: 'https://api.it120.cc/' + app.globalData.subDomain + '/cms/category/list',
           success: function (res) {
@@ -64,21 +83,7 @@ Page({
       })
     }
 
-   
-  },
 
-  /**
-   * 生命周期函数--监听页面初次渲染完成
-   */
-  onReady: function () {
-  
-  },
-
-  /**
-   * 生命周期函数--监听页面显示
-   */
-  onShow: function () {
-  
   },
 
   /**

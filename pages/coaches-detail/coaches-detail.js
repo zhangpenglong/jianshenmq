@@ -27,27 +27,23 @@ Page({
    */
   onLoad: function (options) {
     console.log('onLoad');
-    const coachId = options.id;
+    var studentId = options.studentId;
+    var teacherId = options.teacherId;
+    var name = options.name;
+    
     const that = this;
-    wx.request({
-      url: 'https://api.it120.cc/' + app.globalData.subDomain + '/cms/news/detail',
-      data: {
-        id: coachId
-      },
-      success: function (res) {
-        console.log(res);
-        const coach = res.data.data;
-        that.setData({
-          coach
-        })
-      }
-    });
+  that.setData({
+    studentId: studentId,
+    teacherId:teacherId,
+    name:name
+  })
 
     var date = [];
     for(var i = 0;i<7;i++){
       var onedate = {};
       onedate.id = i;
       onedate.datestr = that.fun_date(i);
+      onedate.date = that.fun_date1(i);
       date.push(onedate);
     }
     var datetime = new Date();
@@ -177,6 +173,18 @@ Page({
     }
     return time;
   },
+  fun_date1: function (a) {
+    var date1 = new Date();
+    var date2 = new Date(date1);
+    date2.setDate(date1.getDate() + a);
+    var mon = date2.getMonth() + 1;
+    var day = date2.getDate();
+    var time = (mon < 10 ? ('0' + mon) : mon) + "-" + (day < 10 ? ('0' + day) : day);
+    var data = date2.getFullYear()+"-" +time
+    return data;
+  },
+
+
   getTimeArray:function(arr,obj){
     var index = -1;
     for (var i = 0; i < arr.length; i++) {
@@ -203,19 +211,52 @@ Page({
     }
     const curselDay = this.data.date[this.data.activedateid].datestr;
     this.setData({
-      modalContent: '请确认您预定的教练信息\r\n教练: ' + this.data.coach.title + '\r\n预约日期: ' + curselDay +'\r\n预约时间: ' + this.data.selstartTime + '--' + this.data.selendTime + '\r\n请检查无误后点击确认',
+      modalContent: '请确认您预定的教练信息\r\n教练: '+this.data.name+'\r\n预约日期: ' + curselDay +'\r\n预约时间: ' + this.data.selstartTime + '--' + this.data.selendTime + '\r\n请检查无误后点击确认',
       modalHidden: false
     });
   },
   modalHide: function () {
-    this.setData({
+    var that = this
+    that.setData({
       modalContent: '',
       modalHidden: true
     });
-    wx.showModal({
-      title: '提示',
-      content: '具体预约方式待与商家沟通后继续开发。谢谢配合。',
-    })
+    console.log(this.data.activedateid)
+    console.log(this.data.date[this.data.activedateid])
+    console.log(this.data.date[this.data.activedateid].date)
+    var param = {
+      teacherId: that.data.teacherId,
+      remarksName: that.data.name,
+      studentId: that.data.studentId,
+      startDate: this.data.selstartTime,
+      endDate:this.data.selendTime,
+      date: this.data.date[this.data.activedateid].date
+    }
+   app.request({
+     url:'course/insertCourse',
+     data:param,
+     method:'',
+     success:function(res){
+        if(res.result.code == 1){
+          wx.showToast({
+            title: '等待对方确认。',
+            icon: 'none',
+            duration: 2000
+          })
+          wx.navigateBack({
+            delta: 1
+          })
+
+        }else{
+          wx.showToast({
+            title: res.result.msg,
+            icon: 'none',
+            duration: 2000
+          })
+        }
+
+     }
+   })
   },
   modalHideCancle: function () {
     this.setData({
